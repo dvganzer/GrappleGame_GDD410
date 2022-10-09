@@ -6,8 +6,8 @@ public class CameraLook : MonoBehaviour {
 
     public Transform lookAt;
     public Transform camTransform;
-    public float sensitivityX = 4;
-    public float sensitivityY = 4;
+    public float sensitivityX = 1;
+    public float sensitivityY = 1;
     public float Y_ANGLE_MIN = -70.0f;
     public float Y_ANGLE_MAX = 70.0f;
 
@@ -23,8 +23,8 @@ public class CameraLook : MonoBehaviour {
 
     private void LateUpdate()
     {
-        currentX += Input.GetAxis("Mouse X") * sensitivityX;
-        currentY -= Input.GetAxis("Mouse Y") * sensitivityY;
+        currentX += Input.GetAxis("MouseX") * sensitivityX;
+        currentY -= Input.GetAxis("MouseY") * sensitivityY;
 
         currentY = Mathf.Clamp(currentY, Y_ANGLE_MIN, Y_ANGLE_MAX);
 

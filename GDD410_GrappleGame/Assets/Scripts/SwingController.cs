@@ -1,5 +1,6 @@
 ﻿using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SwingController : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class SwingController : MonoBehaviour
     public float jumpSpeed = 20.0F;
     public float gravity = 20.0F;
     private Vector3 moveDirection = Vector3.zero;
-    CharacterController controller;
+    public CharacterController controller;
     public Camera cam;
     enum State { Swinging, Falling, Walking };
     State state;
@@ -16,6 +17,7 @@ public class SwingController : MonoBehaviour
     Vector3 previousPosition;
     float distToGround;
     Vector3 hitPos;
+  
 
     void Start()
     {
@@ -60,7 +62,7 @@ public class SwingController : MonoBehaviour
         {
             state = State.Walking;
         }
-        else if (Input.GetButtonDown("Fire1"))
+        else if (Input.GetAxis("Fire1")== 1)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -75,7 +77,7 @@ public class SwingController : MonoBehaviour
 
             }
         }
-        else if (Input.GetButtonDown("Fire2"))
+        else if (Input.GetAxis("Fire1")== 0)
         {
             if (state == State.Swinging)
             {
@@ -86,17 +88,18 @@ public class SwingController : MonoBehaviour
 
     void DoSwingAction()
     {
-        if (Input.GetKey(KeyCode.W))
+       
+        if (Input.GetButton("Horizontal"))
         {
-            pendulum.bob.velocity += pendulum.bob.velocity.normalized * 2;
+            pendulum.bob.velocity += -cam.transform.forward * 0.1f;
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetButton("Horizontal"))
         {
-            pendulum.bob.velocity += -cam.transform.right * 1.2f;
+            pendulum.bob.velocity += -cam.transform.right * 0.1f;
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetButton("Horizontal"))
         {
-            pendulum.bob.velocity += cam.transform.right * 1.2f;
+            pendulum.bob.velocity += cam.transform.right * 0.1f;
         }
         transform.localPosition = pendulum.MoveBob(transform.localPosition, previousPosition, Time.deltaTime);
         previousPosition = transform.localPosition;
@@ -104,6 +107,7 @@ public class SwingController : MonoBehaviour
 
     void DoFallingAction()
     {
+        
         pendulum.arm.length = Mathf.Infinity;
         transform.localPosition = pendulum.Fall(transform.localPosition, Time.deltaTime);
         previousPosition = transform.localPosition;
@@ -111,6 +115,7 @@ public class SwingController : MonoBehaviour
 
     void DoWalkingAction()
     {
+       
         pendulum.bob.velocity = Vector3.zero;
         if (controller.isGrounded)
         {
@@ -127,6 +132,10 @@ public class SwingController : MonoBehaviour
         }
         moveDirection.y -= gravity * Time.deltaTime;
         controller.Move(moveDirection * Time.deltaTime);
+    }
+    void FindClosestGrapple()
+    {
+
     }
 
     void OnControllerColliderHit(ControllerColliderHit hit)
