@@ -100,17 +100,17 @@ public class SwingController : MonoBehaviour
     void DoSwingAction()
     {
        
-        if (Input.GetButton("Horizontal"))
+        if (Input.GetAxis("Vertical") == 1)
         {
-            pendulum.bob.velocity += -cam.transform.forward * 0.1f;
+            pendulum.bob.velocity += pendulum.bob.velocity.normalized * .02f;
         }
-        if (Input.GetButton("Horizontal"))
+        if (Input.GetAxis("Horizontal")== -1)
         {
-            pendulum.bob.velocity += -cam.transform.right * 0.1f;
+            pendulum.bob.velocity += -cam.transform.right * .01f;
         }
-        if (Input.GetButton("Horizontal"))
+        if (Input.GetAxis("Horizontal")==1)
         {
-            pendulum.bob.velocity += cam.transform.right * 0.1f;
+            pendulum.bob.velocity += cam.transform.right * .01f;
         }
         transform.localPosition = pendulum.MoveBob(transform.localPosition, previousPosition, Time.deltaTime);
         previousPosition = transform.localPosition;
