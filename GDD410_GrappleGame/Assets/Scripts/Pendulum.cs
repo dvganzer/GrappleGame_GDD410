@@ -55,7 +55,7 @@ public class Pendulum {
         previousPosition = pos;
         return pos;
     }
-
+   
     public Vector3 GetConstrainedVelocity(Vector3 currentPos, Vector3 previousPoistion, float time)
     {
         float distanceToTether;
@@ -71,7 +71,7 @@ public class Pendulum {
         }
         return Vector3.zero;
     }
-
+    
     public void SwitchTether(Vector3 newPosition)
     {
         bob_tr.transform.parent = null;
@@ -80,6 +80,7 @@ public class Pendulum {
         tether.position = tether.tether_tr.InverseTransformPoint(newPosition);
         arm.length = Vector3.Distance(bob_tr.transform.localPosition, tether.position);
     }
+    
     public Vector3 Fall (Vector3 pos, float time)
     {
         bob.ApplyGravity();
@@ -89,4 +90,5 @@ public class Pendulum {
         pos += bob.velocity * time;
         return pos;
     }
+    
 }

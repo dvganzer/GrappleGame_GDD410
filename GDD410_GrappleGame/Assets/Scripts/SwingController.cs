@@ -1,14 +1,16 @@
 ﻿using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 public class SwingController : MonoBehaviour
 {
-
+    //Walking State ONLY
     public float speed = 6.0F;
     public float jumpSpeed = 20.0F;
     public float gravity = 20.0F;
     private Vector3 moveDirection = Vector3.zero;
+    
     public CharacterController controller;
     public Camera cam;
     enum State { Swinging, Falling, Walking };
@@ -17,9 +19,10 @@ public class SwingController : MonoBehaviour
     Vector3 previousPosition;
     float distToGround;
     Vector3 hitPos;
-  
+    public Transform[] closest_tether;
+    public LineRenderer lr;
 
-    void Start()
+     void Start()
     {
         controller = GetComponent<CharacterController>();
         state = State.Walking;
@@ -28,12 +31,10 @@ public class SwingController : MonoBehaviour
 
         distToGround = GetComponent<CapsuleCollider>().bounds.extents.y;
     }
-
     void Update()
-    {
-
+    { 
         DetermineState();
-
+        Debug.Log(state);
         switch (state)
         {
             case State.Swinging:
@@ -48,40 +49,50 @@ public class SwingController : MonoBehaviour
         }
         previousPosition = transform.localPosition;
     }
-
     bool IsGrounded()
     {
-        print("Grounded");
+       
         return Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f);
     }
-
     void DetermineState()
     {
         // Determine State
         if (IsGrounded())
         {
             state = State.Walking;
+          
         }
-        else if (Input.GetAxis("Fire1")== 1)
+        else if (Input.GetButtonDown("Fire1"))
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
-            {
-                if (state == State.Walking)
-                {
-                    pendulum.bob.velocity = moveDirection;
-                }
-                pendulum.SwitchTether(hit.point);
-                state = State.Swinging;
+             if (state == State.Walking)
+             {
+                pendulum.bob.velocity = moveDirection;
+             }
 
+            Transform bestTarget = null;
+            float closestDistanceSqr = Mathf.Infinity;
+            Vector3 currentPosition = transform.position;
+            foreach (Transform potentialTarget in closest_tether)
+            {
+                Vector3 directionToTarget = potentialTarget.position - currentPosition;
+                float dSqrToTarget = directionToTarget.sqrMagnitude;
+                if (dSqrToTarget < closestDistanceSqr)
+                {
+                    closestDistanceSqr = dSqrToTarget;
+                    bestTarget = potentialTarget;
+                }
             }
+            Debug.Log(bestTarget);
+            pendulum.SwitchTether(bestTarget.position);
+            state = State.Swinging;
+           
         }
-        else if (Input.GetAxis("Fire1")== 0)
+        else if (Input.GetButtonDown("Fire2"))
         {
             if (state == State.Swinging)
             {
                 state = State.Falling;
+              
             }
         }
     }
@@ -111,6 +122,7 @@ public class SwingController : MonoBehaviour
         pendulum.arm.length = Mathf.Infinity;
         transform.localPosition = pendulum.Fall(transform.localPosition, Time.deltaTime);
         previousPosition = transform.localPosition;
+
     }
 
     void DoWalkingAction()
@@ -124,28 +136,31 @@ public class SwingController : MonoBehaviour
             moveDirection.y = 0.0f;
             moveDirection *= speed;
 
+            if(moveDirection != Vector3.zero)
+            {
+                transform.forward = moveDirection;
+            }
+
             if (Input.GetButton("Jump"))
             {
                 moveDirection.y = jumpSpeed;
+               
             }
 
         }
         moveDirection.y -= gravity * Time.deltaTime;
         controller.Move(moveDirection * Time.deltaTime);
     }
-    void FindClosestGrapple()
-    {
 
-    }
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
-    {
+        void OnControllerColliderHit(ControllerColliderHit hit)
+        {
         if (hit.gameObject.name == "Respawn")
         {
             //if too far from arena, reset level
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-    }
+        }
 
     void OnCollisionEnter(Collision collision)
     {
@@ -160,4 +175,5 @@ public class SwingController : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
+    
 }

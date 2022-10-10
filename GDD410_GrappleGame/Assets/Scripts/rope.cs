@@ -9,6 +9,7 @@ public class rope : MonoBehaviour
     LineRenderer lr;
     private bool isTarget1 = true;
     public bool hasParent;
+    public Transform[] closest_tether;
 
     // Use this for initialization
     void Start()
@@ -29,23 +30,42 @@ public class rope : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-
+        FindClosestTether();     
+    }
+    void FindClosestTether()
+    {
+        Transform bestTarget = null;
+        float closestDistanceSqr = Mathf.Infinity;
+        Vector3 currentPosition = transform.position;
+        foreach (Transform potentialTarget in closest_tether)
+        {
+            Vector3 directionToTarget = potentialTarget.position - currentPosition;
+            float dSqrToTarget = directionToTarget.sqrMagnitude;
+            if (dSqrToTarget < closestDistanceSqr)
+            {
+                closestDistanceSqr = dSqrToTarget;
+                bestTarget = potentialTarget;
+            }
+        }
         if (Input.GetButtonDown("Fire1"))
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
-            {
-                print(hit.transform.name);
-                lr.enabled = true;
-            }
+            lr.enabled = true;
         }
         else if (Input.GetButtonDown("Fire2"))
         {
             lr.enabled = false;
         }
+        if (hasParent)
+        {
+            lr.SetPosition(0, transform.InverseTransformPoint(bestTarget.position));
+        }
+        else
+        {
+            lr.SetPosition(0, bestTarget.position);
+        }
+       
 
         lr = GetComponent<LineRenderer>();
         if (hasParent)
@@ -57,15 +77,5 @@ public class rope : MonoBehaviour
             lr.SetPosition(1, bob.position);
         }
 
-        if (hasParent)
-        {
-            lr.SetPosition(0, transform.InverseTransformPoint(curTarget.position));
-        }
-        else
-        {
-            lr.SetPosition(0, curTarget.position);
-        }
-
     }
-
 }

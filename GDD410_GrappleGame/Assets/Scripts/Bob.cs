@@ -16,7 +16,7 @@ public class Bob
     {
         velocity -= gravityDirection * gravity * Time.deltaTime;
     }
-
+    
     public void ApplyDampening()
     {
         dampeningDirection = -velocity;
@@ -28,5 +28,6 @@ public class Bob
     {
         velocity = Vector3.ClampMagnitude(velocity, maximumSpeed);
     }
+    
 }
 
